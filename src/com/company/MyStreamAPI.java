@@ -24,20 +24,14 @@ public class MyStreamAPI {
     }
 
     public static <E> Optional<E> reduce(List<E> elements, BinaryOperator<E> accumulator) {
-        List<E> temporaryList = new ArrayList<>();
-
-        int neededIndex = elements.size() / 2;
-
-        if (elements.size() % 2 == 0)
-            neededIndex--;
 
         E intermediateElement = accumulator.apply(elements.get(0), elements.get(1));
         for (int i = 2; i < elements.size(); i++) {
             intermediateElement = accumulator.apply(intermediateElement, elements.get(i));
-            temporaryList.add(intermediateElement);
         }
 
-        Optional<E> result = Optional.of(temporaryList.get(neededIndex));
+        Optional<E> result = Optional.of(intermediateElement);
+
         return result;
     }
 
