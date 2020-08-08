@@ -13,6 +13,7 @@ public class Example {
         int sum = Stream.of(1, 2, 3, 4).reduce(1, (acc, x) -> acc + x);
         System.out.println(sum);
 
+
 //        String[] array = {"Java", "Ruuuuussshhh"};
 //        Arrays.stream(array).map(s -> s.split(""))
 //                            .flatMap(Arrays::stream)

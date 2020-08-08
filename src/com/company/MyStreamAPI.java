@@ -20,24 +20,22 @@ public class MyStreamAPI {
     public static <E> Optional<E> reduce(List<E> elements, BinaryOperator<E> accumulator) {
 
         E result = accumulator.apply(elements.get(0), elements.get(1));
-        for (int i = 2; i < elements.size(); i++) {
+        for (int i = 2; i < elements.size(); i++)
             result = accumulator.apply(result, elements.get(i));
-        }
         return Optional.of(result);
     }
 
     public static <E> E reduce(E seed, List<E> elements, BinaryOperator<E> accumulator) {
         E result = seed;
-        for (E element : elements) {
+        for (E element : elements)
             result = accumulator.apply(result, element);
-        }
+
         return result;
     }
 
     public static <E> void forEach(List<E> elements, Consumer<E> consumer) {
-        for (E element : elements) {
+        for (E element : elements)
             consumer.accept(element);
-        }
     }
 
     public static <E> List<E> distinct(List<E> elements, Supplier<List<E>> listFactory) {
@@ -60,10 +58,10 @@ public class MyStreamAPI {
 
     public static <E> List<E> filter(List<E> elements, Predicate<E> filter) {
         List<E> result = new ArrayList<>();
-        for (E element : elements) {
+        for (E element : elements)
             if (filter.test(element))
                 result.add(element);
-        }
+
         return result;
     }
 
