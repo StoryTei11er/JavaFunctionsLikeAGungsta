@@ -9,29 +9,29 @@ public class MyStreamAPI {
                                        Supplier<List<E>> listFactory,
                                        int count) {
 
-        List<E> temporaryList = listFactory.get();
+        List<E> result = listFactory.get();
 
         for (int i = 0; i < count; i++) {
-            temporaryList.add((E) generator.get());
+            result.add((E) generator.get());
         }
-        return temporaryList;
+        return result;
     }
 
     public static <E> Optional<E> reduce(List<E> elements, BinaryOperator<E> accumulator) {
 
-        E resultOfReduce = accumulator.apply(elements.get(0), elements.get(1));
+        E result = accumulator.apply(elements.get(0), elements.get(1));
         for (int i = 2; i < elements.size(); i++) {
-            resultOfReduce = accumulator.apply(resultOfReduce, elements.get(i));
+            result = accumulator.apply(result, elements.get(i));
         }
-        return Optional.of(resultOfReduce);
+        return Optional.of(result);
     }
 
     public static <E> E reduce(E seed, List<E> elements, BinaryOperator<E> accumulator) {
-        E resultOfReduce = seed;
+        E result = seed;
         for (E element : elements) {
-            resultOfReduce = accumulator.apply(resultOfReduce, element);
+            result = accumulator.apply(result, element);
         }
-        return resultOfReduce;
+        return result;
     }
 
     public static <E> void forEach(List<E> elements, Consumer<E> consumer) {
@@ -41,10 +41,10 @@ public class MyStreamAPI {
     }
 
     public static <E> List<E> distinct(List<E> elements, Supplier<List<E>> listFactory) {
-        List<E> listOfDistinctValue = listFactory.get();
+        List<E> result = listFactory.get();
         Set<E> set = new HashSet<>(elements);
-        listOfDistinctValue.addAll(set);
-        return listOfDistinctValue;
+        result.addAll(set);
+        return result;
     }
 
     public static <E> Optional<E> min(List<E> elements, Comparator<E> comparator) {
@@ -59,12 +59,12 @@ public class MyStreamAPI {
     }
 
     public static <E> List<E> filter(List<E> elements, Predicate<E> filter) {
-        List<E> filteredList = new ArrayList<>();
+        List<E> result = new ArrayList<>();
         for (E element : elements) {
             if (filter.test(element))
-                filteredList.add(element);
+                result.add(element);
         }
-        return filteredList;
+        return result;
     }
 
     public static <E> boolean anyMatch(List<E> elements, Predicate<E> predicate) {
@@ -102,17 +102,16 @@ public class MyStreamAPI {
                                                         Predicate<E> predicate,
                                                         Supplier<Map<Boolean, List<E>>> mapFactory,
                                                         Supplier<List<E>> listFactory) {
-        List<E> valueOfTrueKey = listFactory.get();
-        List<E> valueOfFalseKey = listFactory.get();
-
+        List<E> listOfTrueValue = listFactory.get();
+        List<E> valueOfFalseValue = listFactory.get();
+        Map<Boolean, List<E>> result = mapFactory.get();
         for (E element : elements)
             if (predicate.test(element))
-                valueOfTrueKey.add(element);
-            else valueOfFalseKey.add(element);
+                listOfTrueValue.add(element);
+            else valueOfFalseValue.add(element);
 
-        Map<Boolean, List<E>> result = mapFactory.get();
-            result.put(true, valueOfTrueKey);
-            result.put(false, valueOfFalseKey);
+        result.put(true, listOfTrueValue);
+        result.put(false, valueOfFalseValue);
 
         return result;
     }
@@ -121,8 +120,14 @@ public class MyStreamAPI {
                                                  Function<T, K> classifier,
                                                  Supplier<Map<K, List<T>>> mapFactory,
                                                  Supplier<List<T>> listFactory) {
-        //TODO Implement me
-        return null;
+        Map<K, List<T>> result = mapFactory.get();
+        for (T element : elements) {
+            K key = classifier.apply(element);
+            if (!result.containsKey(key))
+                result.put(key, listFactory.get());
+            result.get(key).add(element);
+        }
+        return result;
     }
 
     public static <T, K, U> Map<K, U> toMap(List<T> elements,
@@ -130,8 +135,24 @@ public class MyStreamAPI {
                                             Function<T, U> valueFunction,
                                             BinaryOperator<U> mergeFunction,
                                             Supplier<Map<K, U>> mapFactory) {
-        //TODO Implement me
-        return null;
+        List<U> listOfValue = new ArrayList<>();
+        List<K> listOfKey = new ArrayList<>();
+        Map<K, U> result = mapFactory.get();
+
+        for (T element : elements)
+            listOfValue.add(valueFunction.apply(element));
+
+        for (T element : elements)
+            listOfKey.add(keyFunction.apply(element));
+
+        U mergedValue = mergeFunction.apply(listOfValue.get(0), listOfValue.get(1));
+        for (int i = 2; i < elements.size(); i++)
+            mergedValue = mergeFunction.apply(mergedValue, listOfValue.get(i));
+
+        for (K key : listOfKey)
+            result.put(key, mergedValue);
+
+        return result;
     }
 
 
@@ -140,8 +161,19 @@ public class MyStreamAPI {
                                                                         Supplier<Map<Boolean, List<T>>> mapFactory,
                                                                         Supplier<List<T>> listFactory,
                                                                         Function<E, T> elementMapper) {
-        //TODO Implement me
-        return null;
+        Map<Boolean, List<T>> result = mapFactory.get();
+        List<T> listOfTrueKey = listFactory.get();
+        List<T> listOfFalseKey = listFactory.get();
+
+        for (E element : elements)
+            if (predicate.test(element))
+                listOfTrueKey.add(elementMapper.apply(element));
+            else listOfFalseKey.add(elementMapper.apply(element));
+
+        result.put(true, listOfTrueKey);
+        result.put(false, listOfFalseKey);
+
+        return result;
     }
 
     public static <T, U, K> Map<K, List<U>> groupByAndMapElement(List<T> elements,
@@ -149,8 +181,14 @@ public class MyStreamAPI {
                                                                  Supplier<Map<K, List<U>>> mapFactory,
                                                                  Supplier<List<U>> listFactory,
                                                                  Function<T, U> elementMapper) {
-        //TODO Implement me
-        return null;
+        Map<K, List<U>> result = mapFactory.get();
+        for (T element : elements) {
+            K key = classifier.apply(element);
+            if (!result.containsKey(key))
+                result.put(key, listFactory.get());
+            result.get(key).add(elementMapper.apply(element));
+        }
+        return result;
     }
 
 
