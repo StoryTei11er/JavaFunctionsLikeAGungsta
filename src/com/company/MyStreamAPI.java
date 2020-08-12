@@ -143,13 +143,18 @@ public class MyStreamAPI {
         for (T element : elements)
             listOfKey.add(keyFunction.apply(element));
 
-        U mergedValue = mergeFunction.apply(listOfValue.get(0), listOfValue.get(1));
-        for (int i = 2; i < elements.size(); i++)
-            mergedValue = mergeFunction.apply(mergedValue, listOfValue.get(i));
-
-        for (K key : listOfKey)
-            result.put(key, mergedValue);
-
+        int idCounter = 0;
+        for (K key : listOfKey) {
+            U value = listOfValue.get(idCounter);
+            if (!result.containsKey(key)){
+                result.put(key, value);
+            } else{
+                U nextValue = listOfValue.get(idCounter +1);
+                U mergedValue = mergeFunction.apply(value, nextValue);
+                result.put(key, mergedValue);
+            }
+            idCounter++;
+        }
         return result;
     }
 
